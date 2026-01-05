@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'services/inbox_service.dart';
 
 void main() {
   runApp(const MyApp());
@@ -30,14 +31,35 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  void _showAddTaskBottomSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (BuildContext context) {
-        return const AddTaskBottomSheet();
-      },
+  final InboxService _inboxService = InboxService();
+  
+  // TODO: This will be set to true when a task is actively being worked on.
+  // For now, defaults to false to show inbox button when items exist.
+  bool _hasActiveTask = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _inboxService.addListener(_onInboxChanged);
+  }
+
+  @override
+  void dispose() {
+    _inboxService.removeListener(_onInboxChanged);
+    _inboxService.dispose();
+    super.dispose();
+  }
+
+  void _onInboxChanged() {
+    setState(() {});
+  }
+
+  void _showInbox() {
+    // TODO: Navigate to inbox screen
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${_inboxService.itemCount} tasks in inbox'),
+      ),
     );
   }
 
@@ -58,99 +80,14 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddTaskBottomSheet,
-        tooltip: 'Neue Aufgabe hinzufügen',
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
-}
-
-class AddTaskBottomSheet extends StatefulWidget {
-  const AddTaskBottomSheet({super.key});
-
-  @override
-  State<AddTaskBottomSheet> createState() => _AddTaskBottomSheetState();
-}
-
-class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
-  final TextEditingController _taskController = TextEditingController();
-
-  @override
-  void dispose() {
-    _taskController.dispose();
-    super.dispose();
-  }
-
-  void _submitTask() {
-    if (_taskController.text.trim().isNotEmpty) {
-      // TODO: Handle task submission (e.g., call ApiService to break down task)
-      Navigator.pop(context, _taskController.text.trim());
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-        ),
-      ),
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-        left: 16,
-        right: 16,
-        top: 16,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Handle bar
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.outline.withOpacity(0.4),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          // Title
-          Text(
-            'Neue Hauptaufgabe',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          const SizedBox(height: 16),
-          // Text field
-          TextField(
-            controller: _taskController,
-            autofocus: true,
-            decoration: const InputDecoration(
-              labelText: 'Aufgabentitel',
-              hintText: 'Was möchtest du erledigen?',
-              border: OutlineInputBorder(),
-            ),
-            textInputAction: TextInputAction.done,
-            onSubmitted: (_) => _submitTask(),
-          ),
-          const SizedBox(height: 16),
-          // Submit button
-          FilledButton(
-            onPressed: _submitTask,
-            child: const Text('Hinzufügen'),
-          ),
-          const SizedBox(height: 16),
-        ],
-      ),
+      floatingActionButton: !_hasActiveTask && _inboxService.itemCount > 0
+          ? FloatingActionButton.extended(
+              onPressed: _showInbox,
+              icon: const Icon(Icons.inbox),
+              label: Text('${_inboxService.itemCount}'),
+              tooltip: 'Inbox',
+            )
+          : null,
     );
   }
 }
