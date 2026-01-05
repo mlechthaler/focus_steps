@@ -12,6 +12,9 @@ class SummaryView extends StatefulWidget {
 
 class _SummaryViewState extends State<SummaryView>
     with SingleTickerProviderStateMixin {
+  /// Daily goal for number of tasks to complete
+  static const int dailyTaskGoal = 10;
+
   int _completedTasksCount = 0;
   bool _isLoading = true;
   late AnimationController _animationController;
@@ -179,8 +182,7 @@ class _SummaryViewState extends State<SummaryView>
 
   Widget _buildProgressBar(BuildContext context) {
     // Visual progress bar based on task count
-    final maxTasks = 10;
-    final progress = (_completedTasksCount / maxTasks).clamp(0.0, 1.0);
+    final progress = (_completedTasksCount / dailyTaskGoal).clamp(0.0, 1.0);
     
     return Column(
       children: [
@@ -194,7 +196,7 @@ class _SummaryViewState extends State<SummaryView>
         ),
         const SizedBox(height: 8),
         Text(
-          'Ziel: $maxTasks Tasks pro Tag',
+          'Ziel: $dailyTaskGoal Tasks pro Tag',
           style: TextStyle(
             color: Colors.grey.shade600,
             fontSize: 14,

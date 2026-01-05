@@ -1,3 +1,3 @@
 // Export all models
-export 'models/task.dart';
-export 'models/daily_progress.dart';
+export 'task.dart';
+export 'daily_progress.dart';

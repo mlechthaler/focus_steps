@@ -4,6 +4,9 @@ import '../services/storage_service.dart';
 
 /// Service for handling end-of-day logic and app lifecycle events
 class AppLifecycleService with WidgetsBindingObserver {
+  /// Hour threshold for considering it "evening" (18:00 = 6 PM)
+  static const int eveningHourThreshold = 18;
+
   final BuildContext context;
   bool _hasShownDialog = false;
   DateTime? _lastCheckDate;
@@ -34,8 +37,8 @@ class AppLifecycleService with WidgetsBindingObserver {
     
     final now = DateTime.now();
     
-    // Only show if it's evening (after 18:00) or when app is closing
-    final isEvening = now.hour >= 18;
+    // Only show if it's evening or when app is closing
+    final isEvening = now.hour >= eveningHourThreshold;
     
     if (isEvening) {
       _hasShownDialog = true;
