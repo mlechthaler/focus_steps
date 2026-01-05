@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'services/task_repository.dart';
+import 'widgets/procrastinated_tasks_widget.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,25 +22,59 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
   final String title;
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  late final TaskRepository _taskRepository;
+
+  @override
+  void initState() {
+    super.initState();
+    _taskRepository = TaskRepository();
+    // Add sample tasks for demonstration
+    _taskRepository.addSampleTasks();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(title),
+        title: Text(widget.title),
       ),
-      body: const Center(
+      body: SingleChildScrollView(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Text(
-              'Focus Steps - ADHD Task Breakdown',
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                'Focus Steps - ADHD Task Breakdown',
+                style: Theme.of(context).textTheme.headlineSmall,
+                textAlign: TextAlign.center,
+              ),
             ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                'Große Aufgaben in kleine, schaffbare Schritte zerlegt',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.grey[600],
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 24),
+            ProcrastinatedTasksWidget(taskRepository: _taskRepository),
           ],
         ),
       ),
