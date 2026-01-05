@@ -3,83 +3,133 @@ import 'package:focus_steps/models/task.dart';
 
 void main() {
   group('Task', () {
-    test('can be created with required fields', () {
+    test('can be instantiated with required parameters', () {
       final task = Task(
         id: '1',
         title: 'Test Task',
-        estimatedMinutes: 10,
+        steps: [],
         createdAt: DateTime.now(),
       );
-      
+      expect(task, isNotNull);
       expect(task.id, equals('1'));
       expect(task.title, equals('Test Task'));
-      expect(task.estimatedMinutes, equals(10));
-      expect(task.status, equals(TaskStatus.pending));
+      expect(task.parkCount, equals(0));
     });
 
-    test('can be created with all fields', () {
-      final now = DateTime.now();
+    test('can be instantiated with parkCount', () {
       final task = Task(
         id: '1',
         title: 'Test Task',
-        description: 'Test Description',
-        estimatedMinutes: 10,
-        status: TaskStatus.completed,
-        createdAt: now,
-        completedAt: now,
-      );
-      
-      expect(task.description, equals('Test Description'));
-      expect(task.status, equals(TaskStatus.completed));
-      expect(task.completedAt, equals(now));
-    });
-
-    test('copyWith creates a new instance with updated fields', () {
-      final task = Task(
-        id: '1',
-        title: 'Test Task',
-        estimatedMinutes: 10,
+        steps: [],
+        parkCount: 5,
         createdAt: DateTime.now(),
       );
-      
-      final updatedTask = task.copyWith(
-        status: TaskStatus.completed,
-        completedAt: DateTime.now(),
+      expect(task.parkCount, equals(5));
+    });
+
+    test('copyWith creates new instance with updated values', () {
+      final task = Task(
+        id: '1',
+        title: 'Test Task',
+        steps: [],
+        parkCount: 5,
+        createdAt: DateTime.now(),
       );
+
+      final updatedTask = task.copyWith(parkCount: 10);
       
       expect(updatedTask.id, equals(task.id));
       expect(updatedTask.title, equals(task.title));
-      expect(updatedTask.status, equals(TaskStatus.completed));
-      expect(updatedTask.completedAt, isNotNull);
+      expect(updatedTask.parkCount, equals(10));
     });
 
     test('toJson and fromJson work correctly', () {
       final now = DateTime.now();
+      final step = MicroStep(
+        stepNumber: 1,
+        title: 'Step 1',
+        description: 'Description',
+        estimatedMinutes: 5,
+      );
+      
       final task = Task(
         id: '1',
         title: 'Test Task',
-        description: 'Test Description',
-        estimatedMinutes: 10,
-        status: TaskStatus.completed,
+        steps: [step],
+        parkCount: 3,
         createdAt: now,
-        completedAt: now,
       );
-      
+
       final json = task.toJson();
       final restoredTask = Task.fromJson(json);
-      
+
       expect(restoredTask.id, equals(task.id));
       expect(restoredTask.title, equals(task.title));
-      expect(restoredTask.description, equals(task.description));
-      expect(restoredTask.estimatedMinutes, equals(task.estimatedMinutes));
-      expect(restoredTask.status, equals(task.status));
+      expect(restoredTask.parkCount, equals(task.parkCount));
+      expect(restoredTask.steps.length, equals(1));
+    });
+  });
+
+  group('MicroStep', () {
+    test('can be instantiated with required parameters', () {
+      final step = MicroStep(
+        stepNumber: 1,
+        title: 'Test Step',
+        description: 'Test Description',
+        estimatedMinutes: 5,
+      );
+      
+      expect(step, isNotNull);
+      expect(step.stepNumber, equals(1));
+      expect(step.title, equals('Test Step'));
+      expect(step.isCompleted, equals(false));
     });
 
-    test('supports all task statuses', () {
-      expect(TaskStatus.pending, isNotNull);
-      expect(TaskStatus.inProgress, isNotNull);
-      expect(TaskStatus.completed, isNotNull);
-      expect(TaskStatus.parked, isNotNull);
+    test('can be instantiated with isCompleted', () {
+      final step = MicroStep(
+        stepNumber: 1,
+        title: 'Test Step',
+        description: 'Test Description',
+        estimatedMinutes: 5,
+        isCompleted: true,
+      );
+      
+      expect(step.isCompleted, equals(true));
+    });
+
+    test('copyWith creates new instance with updated values', () {
+      final step = MicroStep(
+        stepNumber: 1,
+        title: 'Test Step',
+        description: 'Test Description',
+        estimatedMinutes: 5,
+        isCompleted: false,
+      );
+
+      final updatedStep = step.copyWith(isCompleted: true);
+      
+      expect(updatedStep.stepNumber, equals(step.stepNumber));
+      expect(updatedStep.title, equals(step.title));
+      expect(updatedStep.isCompleted, equals(true));
+    });
+
+    test('toJson and fromJson work correctly', () {
+      final step = MicroStep(
+        stepNumber: 1,
+        title: 'Test Step',
+        description: 'Test Description',
+        estimatedMinutes: 5,
+        isCompleted: true,
+      );
+
+      final json = step.toJson();
+      final restoredStep = MicroStep.fromJson(json);
+
+      expect(restoredStep.stepNumber, equals(step.stepNumber));
+      expect(restoredStep.title, equals(step.title));
+      expect(restoredStep.description, equals(step.description));
+      expect(restoredStep.estimatedMinutes, equals(step.estimatedMinutes));
+      expect(restoredStep.isCompleted, equals(step.isCompleted));
     });
   });
 }

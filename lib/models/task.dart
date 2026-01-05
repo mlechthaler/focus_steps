@@ -1,80 +1,115 @@
-/// Represents a micro-task with its status and metadata
+/// Represents a task with its breakdown into micro-steps
 class Task {
   final String id;
   final String title;
-  final String? description;
-  final int estimatedMinutes;
-  final TaskStatus status;
+  final List<MicroStep> steps;
+  final int parkCount; // Number of times this task was "parked" (procrastinated)
   final DateTime createdAt;
-  final DateTime? completedAt;
+  final DateTime? lastParkedAt;
 
   Task({
     required this.id,
     required this.title,
-    this.description,
-    required this.estimatedMinutes,
-    this.status = TaskStatus.pending,
+    required this.steps,
+    this.parkCount = 0,
     required this.createdAt,
-    this.completedAt,
+    this.lastParkedAt,
   });
 
-  /// Create a copy of this task with some fields updated
   Task copyWith({
     String? id,
     String? title,
-    String? description,
-    int? estimatedMinutes,
-    TaskStatus? status,
+    List<MicroStep>? steps,
+    int? parkCount,
     DateTime? createdAt,
-    DateTime? completedAt,
+    DateTime? lastParkedAt,
   }) {
     return Task(
       id: id ?? this.id,
       title: title ?? this.title,
-      description: description ?? this.description,
-      estimatedMinutes: estimatedMinutes ?? this.estimatedMinutes,
-      status: status ?? this.status,
+      steps: steps ?? this.steps,
+      parkCount: parkCount ?? this.parkCount,
       createdAt: createdAt ?? this.createdAt,
-      completedAt: completedAt ?? this.completedAt,
+      lastParkedAt: lastParkedAt ?? this.lastParkedAt,
     );
   }
 
-  /// Convert task to JSON for storage
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'title': title,
-      'description': description,
-      'estimatedMinutes': estimatedMinutes,
-      'status': status.name,
+      'steps': steps.map((s) => s.toJson()).toList(),
+      'parkCount': parkCount,
       'createdAt': createdAt.toIso8601String(),
-      'completedAt': completedAt?.toIso8601String(),
+      'lastParkedAt': lastParkedAt?.toIso8601String(),
     };
   }
 
-  /// Create task from JSON
   factory Task.fromJson(Map<String, dynamic> json) {
     return Task(
       id: json['id'] as String,
       title: json['title'] as String,
-      description: json['description'] as String?,
-      estimatedMinutes: json['estimatedMinutes'] as int,
-      status: TaskStatus.values.firstWhere(
-        (e) => e.name == json['status'],
-        orElse: () => TaskStatus.pending,
-      ),
+      steps: (json['steps'] as List<dynamic>)
+          .map((s) => MicroStep.fromJson(s as Map<String, dynamic>))
+          .toList(),
+      parkCount: json['parkCount'] as int? ?? 0,
       createdAt: DateTime.parse(json['createdAt'] as String),
-      completedAt: json['completedAt'] != null
-          ? DateTime.parse(json['completedAt'] as String)
+      lastParkedAt: json['lastParkedAt'] != null
+          ? DateTime.parse(json['lastParkedAt'] as String)
           : null,
     );
   }
 }
 
-/// Status of a task
-enum TaskStatus {
-  pending,
-  inProgress,
-  completed,
-  parked, // Parked tasks are postponed to next day
+/// Represents a single micro-step within a task
+class MicroStep {
+  final int stepNumber;
+  final String title;
+  final String description;
+  final int estimatedMinutes;
+  final bool isCompleted;
+
+  MicroStep({
+    required this.stepNumber,
+    required this.title,
+    required this.description,
+    required this.estimatedMinutes,
+    this.isCompleted = false,
+  });
+
+  MicroStep copyWith({
+    int? stepNumber,
+    String? title,
+    String? description,
+    int? estimatedMinutes,
+    bool? isCompleted,
+  }) {
+    return MicroStep(
+      stepNumber: stepNumber ?? this.stepNumber,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      estimatedMinutes: estimatedMinutes ?? this.estimatedMinutes,
+      isCompleted: isCompleted ?? this.isCompleted,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'step_number': stepNumber,
+      'title': title,
+      'description': description,
+      'estimated_minutes': estimatedMinutes,
+      'isCompleted': isCompleted,
+    };
+  }
+
+  factory MicroStep.fromJson(Map<String, dynamic> json) {
+    return MicroStep(
+      stepNumber: json['step_number'] as int,
+      title: json['title'] as String,
+      description: json['description'] as String,
+      estimatedMinutes: json['estimated_minutes'] as int,
+      isCompleted: json['isCompleted'] as bool? ?? false,
+    );
+  }
 }
