@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends ConsumerWidget {
+class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
   final String title;
@@ -43,48 +43,27 @@ class MyHomePage extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final currentTasks = ref.watch(currentTasksProvider);
-    final inboxTasks = ref.watch(inboxTasksProvider);
+  State<MyHomePage> createState() => _MyHomePageState();
+}
 
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: Text(title),
-          bottom: const TabBar(
-            tabs: [
-              Tab(icon: Icon(Icons.list), text: 'Aktuelle Aufgaben'),
-              Tab(icon: Icon(Icons.inbox), text: 'Inbox'),
-            ],
-          ),
-        ),
-        body: TabBarView(
-          children: [
-            // Current tasks tab
-            _buildTasksList(
-              context,
-              ref,
-              currentTasks,
-              currentTasksProvider,
-              emptyMessage: 'Keine aktuellen Aufgaben.\nFüge eine neue Aufgabe hinzu!',
-            ),
-            // Inbox tab
-            _buildTasksList(
-              context,
-              ref,
-              inboxTasks,
-              inboxTasksProvider,
-              emptyMessage: 'Inbox ist leer.\nSpeichere Aufgaben für später hier.',
-            ),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () => _showAddTaskBottomSheet(context),
-          icon: const Icon(Icons.add),
-          label: const Text('Neue Aufgabe'),
-        ),
+class _MyHomePageState extends State<MyHomePage> {
+  void _showAddTaskBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return const AddTaskBottomSheet();
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text(widget.title),
       ),
     );
   }
@@ -116,27 +95,100 @@ class MyHomePage extends ConsumerWidget {
             ),
           ],
         ),
-      );
-    }
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showAddTaskBottomSheet,
+        tooltip: 'Neue Aufgabe hinzufügen',
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
 
-    return ListView.builder(
-      padding: const EdgeInsets.only(top: 8, bottom: 80),
-      itemCount: tasks.length,
-      itemBuilder: (context, index) {
-        final task = tasks[index];
-        return TaskCard(
-          task: task,
-          onDelete: () {
-            ref.read(provider.notifier).removeTask(task.id);
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Aufgabe gelöscht'),
-                duration: Duration(seconds: 2),
+class AddTaskBottomSheet extends StatefulWidget {
+  const AddTaskBottomSheet({super.key});
+
+  @override
+  State<AddTaskBottomSheet> createState() => _AddTaskBottomSheetState();
+}
+
+class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
+  final TextEditingController _taskController = TextEditingController();
+
+  @override
+  void dispose() {
+    _taskController.dispose();
+    super.dispose();
+  }
+
+  void _submitTask() {
+    if (_taskController.text.trim().isNotEmpty) {
+      // TODO: Handle task submission (e.g., call ApiService to break down task)
+      Navigator.pop(context, _taskController.text.trim());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+      ),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+        left: 16,
+        right: 16,
+        top: 16,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Handle bar
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.outline.withOpacity(0.4),
+                borderRadius: BorderRadius.circular(2),
               ),
-            );
-          },
-        );
-      },
+            ),
+          ),
+          // Title
+          Text(
+            'Neue Hauptaufgabe',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 16),
+          // Text field
+          TextField(
+            controller: _taskController,
+            autofocus: true,
+            decoration: const InputDecoration(
+              labelText: 'Aufgabentitel',
+              hintText: 'Was möchtest du erledigen?',
+              border: OutlineInputBorder(),
+            ),
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) => _submitTask(),
+          ),
+          const SizedBox(height: 16),
+          // Submit button
+          FilledButton(
+            onPressed: _submitTask,
+            child: const Text('Hinzufügen'),
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
     );
   }
 }
