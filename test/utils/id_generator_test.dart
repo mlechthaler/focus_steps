@@ -8,10 +8,10 @@ void main() {
       expect(id, isNotEmpty);
     });
 
-    test('generate returns unique IDs', () {
+    test('generate returns unique IDs', () async {
       final id1 = IdGenerator.generate();
       // Add a small delay to ensure different timestamps
-      Future.delayed(const Duration(milliseconds: 1));
+      await Future.delayed(const Duration(milliseconds: 2));
       final id2 = IdGenerator.generate();
 
       expect(id1, isNot(equals(id2)));
