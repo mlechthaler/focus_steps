@@ -3,14 +3,15 @@ import '../models/task.dart';
 import '../services/api_service.dart';
 
 /// Provider for the ApiService instance
-/// In production, the API key should come from secure storage or environment
+/// The API key should be provided via environment variable OPENAI_API_KEY
+/// If not provided, operations will fail with an authentication error from the API
 final apiServiceProvider = Provider<ApiService>((ref) {
-  return ApiService(
-    apiKey: const String.fromEnvironment(
-      'OPENAI_API_KEY',
-      defaultValue: '',
-    ),
+  const apiKey = String.fromEnvironment(
+    'OPENAI_API_KEY',
+    defaultValue: '',
   );
+
+  return ApiService(apiKey: apiKey);
 });
 
 /// Provider for the current tasks list (tasks that are being worked on)

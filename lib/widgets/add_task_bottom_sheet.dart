@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/task.dart';
 import '../providers/tasks_provider.dart';
+import '../utils/id_generator.dart';
 
 /// BottomSheet for adding a new task with two options:
 /// 1. Break down immediately and add to current tasks
@@ -45,7 +46,7 @@ class _AddTaskBottomSheetState extends ConsumerState<AddTaskBottomSheet> {
       final breakdown = await apiService.breakdownTask(taskTitle);
 
       // Create a task from the API response
-      final taskId = DateTime.now().millisecondsSinceEpoch.toString();
+      final taskId = IdGenerator.generate();
       final task = Task.fromApiResponse(breakdown, taskId);
 
       // Add to current tasks as the next task
@@ -85,7 +86,7 @@ class _AddTaskBottomSheetState extends ConsumerState<AddTaskBottomSheet> {
 
     try {
       // Create a simple task for the inbox
-      final taskId = DateTime.now().millisecondsSinceEpoch.toString();
+      final taskId = IdGenerator.generate();
       final task = Task.forInbox(taskTitle, taskId);
 
       // Add to inbox
