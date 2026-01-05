@@ -31,10 +31,7 @@ class InboxService extends ChangeNotifier {
 
   /// Gets an item by ID
   InboxItem? getItemById(String id) {
-    try {
-      return _items.firstWhere((item) => item.id == id);
-    } catch (e) {
-      return null;
-    }
+    final matches = _items.where((item) => item.id == id);
+    return matches.isEmpty ? null : matches.first;
   }
 }

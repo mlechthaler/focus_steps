@@ -32,6 +32,9 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final InboxService _inboxService = InboxService();
+  
+  // TODO: This will be set to true when a task is actively being worked on.
+  // For now, defaults to false to show inbox button when items exist.
   bool _hasActiveTask = false;
 
   @override
