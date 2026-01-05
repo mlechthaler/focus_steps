@@ -117,7 +117,7 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
               height: 4,
               margin: const EdgeInsets.only(bottom: 16),
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                color: Theme.of(context).colorScheme.outline.withOpacity(0.4),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
