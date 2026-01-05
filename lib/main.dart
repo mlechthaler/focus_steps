@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'models/task.dart';
+import 'providers/tasks_provider.dart';
+import 'widgets/add_task_bottom_sheet.dart';
+import 'widgets/task_card.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -24,6 +33,14 @@ class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
   final String title;
+
+  void _showAddTaskBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => const AddTaskBottomSheet(),
+    );
+  }
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -48,12 +65,33 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
-      body: const Center(
+    );
+  }
+
+  Widget _buildTasksList(
+    BuildContext context,
+    WidgetRef ref,
+    List<Task> tasks,
+    StateNotifierProvider<TasksNotifier, List<Task>> provider,
+    {required String emptyMessage}
+  ) {
+    if (tasks.isEmpty) {
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
+          children: [
+            Icon(
+              Icons.checklist,
+              size: 64,
+              color: Theme.of(context).colorScheme.secondary.withOpacity(0.5),
+            ),
+            const SizedBox(height: 16),
             Text(
-              'Focus Steps - ADHD Task Breakdown',
+              emptyMessage,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.secondary,
+                  ),
             ),
           ],
         ),
